@@ -21,12 +21,13 @@ COMMANDS=()
 if [ $1 == "validate" ] || [ $1 == "full" ]
 then
     COMMANDS+=("terraform fmt -check=true")
-    COMMANDS+=("terraform validate -check-variables=false")
+    COMMANDS+=("terraform init")
+    COMMANDS+=("terraform validate")
     COMMANDS+=("dep ensure")
 fi
 
 if [ $1 == "full" ]; then
-    COMMANDS+=("go test -v ./test/ -timeout 20m")
+    COMMANDS+=("go test -v ./test/ -timeout 30m")
 fi
 
 for command in "${COMMANDS[@]}"
