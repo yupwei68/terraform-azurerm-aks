@@ -45,3 +45,21 @@ module aks_without_monitor {
   enable_log_analytics_workspace = false
   depends_on                     = [azurerm_resource_group.main]
 }
+
+resource "azuread_group" "aks_cluster_admins" {
+  name = "AKS-cluster-admins"
+}
+
+module aks_with_rbac {
+  source                           = "../.."
+  prefix                           = "prefix3-${random_id.prefix.hex}"
+  resource_group_name              = azurerm_resource_group.main.name
+  client_id                        = var.client_id
+  client_secret                    = var.client_secret
+  vnet_subnet_id                   = azurerm_subnet.test.id
+  os_disk_size_gb                  = 60
+  enable_http_application_routing  = true
+  enable_role_based_access_control = true
+  rbac_aad_admin_group_object_ids  = [azuread_group.aks_cluster_admins.id]
+  depends_on                       = [azurerm_resource_group.main]
+}
