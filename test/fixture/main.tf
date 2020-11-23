@@ -46,10 +46,6 @@ module aks_without_monitor {
   depends_on                     = [azurerm_resource_group.main]
 }
 
-resource "azuread_group" "aks_cluster_admins" {
-  name = "AKS-cluster-admins"
-}
-
 module aks_with_rbac {
   source                           = "../.."
   prefix                           = "prefix3-${random_id.prefix.hex}"
@@ -60,6 +56,9 @@ module aks_with_rbac {
   os_disk_size_gb                  = 60
   enable_http_application_routing  = true
   enable_role_based_access_control = true
-  rbac_aad_admin_group_object_ids  = [azuread_group.aks_cluster_admins.id]
+  rbac_aad_managed                 = false
+  rbac_aad_client_app_id           = var.client_id
+  rbac_aad_server_app_id           = var.client_id
+  rbac_aad_server_app_secret       = var.client_secret
   depends_on                       = [azurerm_resource_group.main]
 }
