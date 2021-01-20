@@ -18,10 +18,11 @@ resource "azurerm_virtual_network" "test" {
 }
 
 resource "azurerm_subnet" "test" {
-  name                 = "${random_id.prefix.hex}-sn"
-  resource_group_name  = azurerm_resource_group.main.name
-  virtual_network_name = azurerm_virtual_network.test.name
-  address_prefixes     = ["10.52.0.0/24"]
+  name                                           = "${random_id.prefix.hex}-sn"
+  resource_group_name                            = azurerm_resource_group.main.name
+  virtual_network_name                           = azurerm_virtual_network.test.name
+  enforce_private_link_endpoint_network_policies = false
+  address_prefixes                               = ["10.52.0.0/24"]
 }
 
 module "aks" {
@@ -62,6 +63,13 @@ module "aks" {
   net_profile_service_cidr       = "10.0.0.0/16"
 
   depends_on = [azurerm_resource_group.main]
+}
+
+provider "kubernetes" {
+  host                   = module.aks.host
+  client_certificate     = base64decode(module.aks.client_certificate)
+  client_key             = base64decode(module.aks.client_key)
+  cluster_ca_certificate = base64decode(module.aks.cluster_ca_certificate)
 }
 
 module "aks_without_monitor" {
